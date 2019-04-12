@@ -79,9 +79,13 @@ Please refer to the test folder.
 | height      | integer| 0           | If 0, height is parent element's height. |
 | fit         | string | 'cover'     | Value of css 'object-fit' for slide's img tag |
 | muted       | boolean| false       | Specifies that the audio output of the video should be muted |
+| children    | array  | [ ]         | List of url for videos |
 
 
 ## Changelog
+
+**V1.0.2**
+- Remove some bug. 
 
 **V1.0.1**
 - Remove some bug. 

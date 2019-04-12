@@ -3,9 +3,9 @@
  * last modified : 2019.04.12
  * @author Seungho.Yi <rh22sh@gmail.com>
  * @package SnackSliderV
- * @Version 1.0.0
+ * @Version 1.0.2
  * @license MIT
- * @see https://github.com/rheesh/SnackSlider
+ * @see https://github.com/rheesh/SnackSliderV
  */
 
 class SnackSliderV {
@@ -76,6 +76,8 @@ class SnackSliderV {
     }
     set poster(value) {
         this._poster = value;
+        this.video[0].attr("poster", this._poster);
+        this.video[1].attr("poster", this._poster);
     }
 
     get(idx){
@@ -279,7 +281,7 @@ class SnackSliderV {
                 zIndex: 10-i,
             });
             this.video[i].attr("poster", this.poster);
-            this.video[i].attr("muted", this.muted);
+            this.video[i].get(0).muted = this.muted;
             this.video[i].attr("src", this.current);
             this.video[i].get(0).load();
         }
