@@ -38,23 +38,25 @@ Please refer to the test folder.
 
 
 ````
-<script>
+ <script>
         let slider;
         $(document).ready(function () {
-            slider = new SnackSlider({
+            slider = new SnackSliderV({
                 selector: '.slider',
                 mode: 'right',
-                speed: 2000,
-                pause: 3000,
+                speed: 1000,
+                muted: false,
+                poster: './poster.jpg',
                 width: 320,
                 height: 240,
                 fit: 'cover',
                 children: [
-                    './rainbow.jpg',
-                    './rio.jpg',
-                    './spiral-staircase.jpg',
+                    './1.mp4',
+                    './2.mp4',
+                    './3.mp4',
                 ]
             });
+
         });
     </script>
 
