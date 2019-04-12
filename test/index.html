@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+
+
+    <link href="../src/snacksliderv.css" rel="stylesheet" />
+    <script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="../src/snacksliderv.js"></script>
+
+    <script>
+        let slider;
+        $(document).ready(function () {
+            slider = new SnackSliderV({
+                selector: '.slider',
+                mode: 'right',
+                speed: 1000,
+                muted: false,
+                poster: './poster.jpg',
+                width: 320,
+                height: 240,
+                fit: 'cover',
+                children: [
+                    './1.mp4',
+                    './2.mp4',
+                    './3.mp4',
+                ]
+            });
+
+        });
+    </script>
+
+
+</head>
+<body>
+    <h1>Snack Slider Test</h1>
+    <div class="slider" style="width:640px;height:480px"></div>
+    <button onClick="slider.mode='left'">left</button>
+    <button onClick="slider.mode='right'">right</button>
+    <button onClick="slider.mode='top'">top</button>
+    <button onClick="slider.mode='bottom'">bottom</button>
+    <button onClick="slider.mode='fade'">fade</button><br/>
+    <button onClick="slider.speed=500">speed 0.5s</button>
+    <button onClick="slider.speed=1000">speed 1s</button>
+    <button onClick="slider.speed=2000">speed 2s</button>
+    <button onClick="slider.fit='cover'">cover</button>
+    <button onClick="slider.fit='contain'">contain</button>
+    <button onClick="slider.fit='fill'">fill</button><br/>
+    <button onClick="slider.width=320">w320</button>
+    <button onClick="slider.height=240">h240</button>
+    <button onClick="slider.width=640">w640</button>
+    <button onClick="slider.height=480">h480</button><br/>
+    <button onClick="slider.muted=!slider.muted">mute</button>
+    <button onClick="slider.delete(1)">remove 2nd video</button>
+    <button onClick="slider.insert(1, './2.mp4')">insert 2nd video</button>
+    <button onClick="slider.play()">Play</button>
+    <button onClick="slider.start()">Start</button>
+    <button onClick="slider.stop()">Stop</button><br/>
+</body>
+</html>
