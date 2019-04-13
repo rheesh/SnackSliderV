@@ -1,9 +1,9 @@
 /**
  * @overview Simple video slider Class
- * last modified : 2019.04.12
+ * last modified : 2019.04.13
  * @author Seungho.Yi <rh22sh@gmail.com>
  * @package SnackSliderV
- * @Version 1.0.2
+ * @Version 1.0.3
  * @license MIT
  * @see https://github.com/rheesh/SnackSliderV
  */
@@ -23,7 +23,7 @@ class SnackSliderV {
         };
         let {selector, mode, speed, fit, muted, poster, width, height, children} = options;
         this.flag = 0;
-        this.selector = selector;
+        this._selector = selector;
         this._mode = mode;
         this.speed = speed;
         this._muted = muted;
@@ -36,9 +36,30 @@ class SnackSliderV {
         this.viewport = null;
         this.video = [ null, null ];
         this.children = Array.from(children);
+        this.worker = false;
         this.play = this.play.bind(this);
         this.setNextCss = this.setNextCss.bind(this);
         this.build();
+    }
+
+    get selector() {
+        return this._selector;
+    }
+
+    set selector(value) {
+        let flag = this.worker;
+        if(flag) this.stop();
+        this.viewport = this.viewport.detach();
+        this._selector = value;
+        this.viewport.appendTo(this.selector);
+        this.wrapper = $(this.selector);
+        if(this._width === 0 || this.height === 0){
+            this.viewport.css({
+                width: this.width,
+                height: this.height,
+            });
+        }
+        if(flag) this.start();
     }
 
     get length(){
@@ -256,13 +277,13 @@ class SnackSliderV {
     }
 
     build(){
-        let viewport = '<div class="slider-viewport" ></div>';
+        let viewport = '<div class="video-viewport" ></div>';
         let video = [
-            '<video class="slide0 snackslide" preload="auto" ></video>',
-            '<video class="slide1 snackslide" preload="auto" ></video>',
+            '<video class="slide0 snackvideo" preload="auto" ></video>',
+            '<video class="slide1 snackvideo" preload="auto" ></video>',
         ];
         this.wrapper.append(viewport);
-        this.viewport = this.wrapper.children('.slider-viewport');
+        this.viewport = this.wrapper.children('.video-viewport');
         this.viewport.css({
             width: this.width,
             height: this.height,
@@ -297,7 +318,7 @@ class SnackSliderV {
         function fn(){
             obj.video[flag].css({top:0, left:0, opacity: 1.0, transition: '', transform: ''});
             obj.video[flag].get(0).play();
-            obj.video[1-flag].attr("src", "./"+obj.current);
+            obj.video[1-flag].attr("src", obj.current);
             obj.video[1-flag].get(0).load();
             obj.setNextCss();
         }
@@ -320,12 +341,14 @@ class SnackSliderV {
 
     start(){
         if(this.length === 0) return;
+        this.worker = true;
         this.video[this.flag].get(0).play();
         this.video[this.flag].on('ended', this.play);
         this.video[1-this.flag].on('ended', this.play);
     }
 
     destroy(){
+        this.worker = false;
         this.video[0].off('ended');
         this.video[1].off('ended');
         this.killTranslation(0);

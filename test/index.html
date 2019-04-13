@@ -15,7 +15,7 @@
         let slider;
         $(document).ready(function () {
             slider = new SnackSliderV({
-                selector: '.slider',
+                selector: '.slider1',
                 mode: 'right',
                 speed: 1000,
                 muted: true,
@@ -37,7 +37,7 @@
 </head>
 <body>
     <h1>Snack Slider V Test</h1>
-    <div class="slider" style="width:640px;height:480px"></div>
+    <div class="slider1" style="width:640px;height:480px"></div>
     <button onClick="slider.mode='left'">left</button>
     <button onClick="slider.mode='right'">right</button>
     <button onClick="slider.mode='top'">top</button>
@@ -61,6 +61,11 @@
     <button onClick="slider.insert(1, './2.mp4')">insert 2nd video</button>
     <button onClick="slider.play()">Play</button>
     <button onClick="slider.start()">Start</button>
-    <button onClick="slider.stop()">Stop</button><br/>
+    <button onClick="slider.stop()">Stop</button>
+    <br/>
+    <button onClick="slider.selector='.slider1'">slider1</button>
+    <button onClick="slider.selector='.slider2'">slider2</button>
+    <br/>
+    <div class="slider2" style="width:640px;height:480px"></div>
 </body>
 </html>

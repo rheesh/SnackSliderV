@@ -84,6 +84,9 @@ Please refer to the test folder.
 
 ## Changelog
 
+**V1.0.3**
+- Add selector setter 
+
 **V1.0.2**
 - Remove some bug. 
 
