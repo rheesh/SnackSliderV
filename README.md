@@ -80,9 +80,14 @@ Please refer to the test folder.
 | fit         | string | 'cover'     | Value of css 'object-fit' for slide's img tag |
 | muted       | boolean| false       | Specifies that the audio output of the video should be muted |
 | children    | array  | [ ]         | List of url for videos |
+| passError   | boolean| false       | Whether to automatically move to the next video if the video fails to play |
+| passTime    | integer| 5000        | Period to check if a video has failed.(ms) When checked for failure three times in a row, move on to the next. |
 
 
 ## Changelog
+
+**V1.0.5**
+- Add passError option. 
 
 **V1.0.3**
 - Add selector setter 

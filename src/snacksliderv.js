@@ -1,9 +1,9 @@
 /**
  * @overview Simple video slider Class
- * last modified : 2019.04.13
+ * last modified : 2019.04.15
  * @author Seungho.Yi <rh22sh@gmail.com>
  * @package SnackSliderV
- * @Version 1.0.3
+ * @Version 1.0.5
  * @license MIT
  * @see https://github.com/rheesh/SnackSliderV
  */
@@ -11,7 +11,7 @@
 class SnackSliderV {
 
     constructor(options){
-        const opt = {
+        const opt = Object.assign({
             mode: 'right',
             speed: 1000,
             fit: 'cover',
@@ -20,8 +20,11 @@ class SnackSliderV {
             width: 0,
             height: 0,
             children: [],
-        };
-        let {selector, mode, speed, fit, muted, poster, width, height, children} = options;
+            passError: false,
+            passTime: 5000
+        }, options);
+        let {selector, mode, speed, fit, muted, poster, width, height, children,
+            passError, passTime} = opt;
         this.flag = 0;
         this._selector = selector;
         this._mode = mode;
@@ -32,13 +35,20 @@ class SnackSliderV {
         this._width = width;
         this._height = height;
         this._current = 0;
+        this._passError = passError;
+        this._passTime = passTime;
         this.wrapper = $(selector);
         this.viewport = null;
         this.video = [ null, null ];
         this.children = Array.from(children);
         this.worker = false;
+        this.watcher = null;
+        this.watcherQueue = [];
         this.play = this.play.bind(this);
         this.setNextCss = this.setNextCss.bind(this);
+        this.pass2next = this.pass2next.bind(this);
+        this.videoLoad = this.videoLoad.bind(this);
+        this.videoPlay = this.videoPlay.bind(this);
         this.build();
     }
 
@@ -71,7 +81,8 @@ class SnackSliderV {
     }
     set mode(value) {
         this._mode = value;
-        this.setNextCss();
+        if(this.worker)
+            this.setNextCss();
     }
 
     get muted() {
@@ -154,6 +165,35 @@ class SnackSliderV {
         this.viewport.children('video').css('height', this.height);
     }
 
+    get passError() {
+        return this._passError;
+    }
+    set passError(value) {
+        this._passError = value;
+        if(this.passError){
+            if(this.worker){
+                this.watcher = setInterval(this.pass2next, this.passTime)
+            }
+        }else{
+            if(this.watcher){
+                clearInterval(this.watcher);
+                this.watcher = null;
+            }
+        }
+    }
+
+    get passTime() {
+        const speed = this.speed + 10;
+        return this._passTime > speed ? this._passTime : speed;
+    }
+    set passTime(value) {
+        this._passTime = value;
+        if(this.watcher){
+            clearInterval(this.watcher);
+            this.watcher = setInterval(this.pass2next, this.passTime)
+        }
+    }
+
     //total play time (s)
     duration(idx){
         if(idx === undefined)
@@ -210,6 +250,22 @@ class SnackSliderV {
         if(idx === undefined)
             return this.video[this.flag].get(0).error;
         return this.video[idx].get(0).error;
+    }
+
+    videoLoad(idx){
+        try{
+            this.video[idx].get(0).load();
+        }catch(e){
+            console.log(e);
+        }
+    }
+
+    videoPlay(idx){
+        try{
+            this.video[idx].get(0).play();
+        }catch(e){
+            console.log('play err:', e);
+        }
     }
 
     get transformValue(){
@@ -304,24 +360,38 @@ class SnackSliderV {
             this.video[i].attr("poster", this.poster);
             this.video[i].get(0).muted = this.muted;
             this.video[i].attr("src", this.current);
-            this.video[i].get(0).load();
+            this.videoLoad(i);
         }
         this.setNextCss();
     }
 
-    play(){
-        if((!this.ended()) && this.paused()) return this.video[this.flag].get(0).play();
-
-        let obj = this;
-        let { length, video, flag, speed } = obj;
-
-        function fn(){
-            obj.video[flag].css({top:0, left:0, opacity: 1.0, transition: '', transform: ''});
-            obj.video[flag].get(0).play();
-            obj.video[1-flag].attr("src", obj.current);
-            obj.video[1-flag].get(0).load();
-            obj.setNextCss();
+    pass2next(){
+        let err = this.error();
+        if((err && err.code>1) || this.paused()){
+            this.watcherQueue.push(new Date());
+        }else{
+            this.watcherQueue = [];
         }
+        if(this.watcherQueue.length > 2){
+            this.play();
+        }
+    }
+
+    play(){
+        if((!this.ended()) && (!this.error()) && this.paused()){
+            this.videoPlay(this.flag);
+            return;
+        }
+
+        let { length, video, flag, speed } = this;
+        function fn(){
+            this.video[this.flag].css({top:0, left:0, opacity: 1.0, transition: '', transform: ''});
+            this.videoPlay(this.flag);
+            this.video[1-this.flag].attr("src", this.current);
+            this.videoLoad(1-this.flag);
+            this.setNextCss();
+        }
+        fn = fn.bind(this);
 
         if(length === 0) return;
         video[flag].css('z-index', 9);
@@ -342,15 +412,21 @@ class SnackSliderV {
     start(){
         if(this.length === 0) return;
         this.worker = true;
-        this.video[this.flag].get(0).play();
+        this.play();
         this.video[this.flag].on('ended', this.play);
         this.video[1-this.flag].on('ended', this.play);
+        if(this.passError)
+            this.watcher = setInterval(this.pass2next, this.passTime)
     }
 
     destroy(){
         this.worker = false;
-        this.video[0].off('ended');
-        this.video[1].off('ended');
+        if(this.watcher){
+            clearInterval(this.watcher);
+            this.watcher = null;
+        }
+        this.video[0].off();
+        this.video[1].off();
         this.killTranslation(0);
         this.killTranslation(1);
     }
